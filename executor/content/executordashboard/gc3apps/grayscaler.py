@@ -40,7 +40,7 @@ class GrayscaleApp(Application):
         Application.__init__(
             self,
             arguments=[
-                "/usr/bin/convert", inp, "-colorspace", "gray", out],
+                "convert", inp, "-colorspace", "gray", out],
             inputs=[img],
             outputs=[out],
             stdout="stdout.txt",
