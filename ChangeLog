@@ -1,4 +1,11 @@
 CHANGES
 =======
 
+* horizon requirements
+* - on the way to mitaka support
+* - downgrade to mitaka
+* use executer version wild-card
+* config for uzh infrastructure
+* - docker goes manage py for now
+* - major refactoring - code cleanup - readme - docker - plugin is installable
 * initial commit

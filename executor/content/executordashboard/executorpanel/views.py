@@ -26,6 +26,17 @@ from executor.content.executordashboard.executorpanel.tables import JobsTable
 from executor.content.executordashboard.executorpanel.utils import inject_nova_client_auth_params
 from executor.content.executordashboard.gc3apps.gndn import GndnScript
 from executor.content.executordashboard.tasks import runGC3PieTask
+def get_auth_params_from_request(request):
+    """Extracts the properties from the request object needed by the novaclient
+    call below. These will be used to memoize the calls to novaclient
+    """
+    return (
+        request.user.username,
+        request.user.token.id,
+        request.user.tenant_id,
+        api.base.url_for(request, 'compute'),
+        api.base.url_for(request, 'identity')
+    )
 
 
 class ListView(tables.DataTableView):
@@ -45,7 +56,7 @@ class IndexView(tables.DataTableView):
 
     def get_data(self):
         # Add data to the context here...
-        auth_params = api.nova.get_auth_params_from_request(self.request)
+        auth_params = get_auth_params_from_request(self.request)
         # runGC3PieTask.delay(auth_params)
         inject_nova_client_auth_params(auth_params)
         gsession = cmd_gsession()
@@ -76,7 +87,6 @@ class CreateJobView(views.APIView):
 
     def get_data(self, request, context, *args, **kwargs):
 
-        # runGC3PieTask(api.nova.get_auth_params_from_request(request))
 
         payload = {}
         for key, action in GndnScript().actions.items():
@@ -108,5 +118,5 @@ class CreateJobView(views.APIView):
                 for chunk in file.chunks():
                     destination.write(chunk)
             paths.append(file_path)
-        runGC3PieTask.delay(api.nova.get_auth_params_from_request(request), request.POST, paths)
+        runGC3PieTask.delay(get_auth_params_from_request(request), request.POST, paths)
         return redirect(reverse('horizon:executordashboard:executorpanel:index'))

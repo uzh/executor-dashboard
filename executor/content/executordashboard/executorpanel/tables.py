@@ -14,6 +14,18 @@ from openstack_dashboard import api
 from executor.content.executordashboard.executorpanel.utils import inject_nova_client_auth_params
 
 
+def get_auth_params_from_request(request):
+    """Extracts the properties from the request object needed by the novaclient
+    call below. These will be used to memoize the calls to novaclient
+    """
+    return (
+        request.user.username,
+        request.user.token.id,
+        request.user.tenant_id,
+        api.base.url_for(request, 'compute'),
+        api.base.url_for(request, 'identity')
+    )
+
 class DeleteJobAction(tables.DeleteAction):
     def action_present(self, number):
         return "Delete"
@@ -23,7 +35,7 @@ class DeleteJobAction(tables.DeleteAction):
 
     def delete(self, request, obj_id):
         # Add data to the context here...
-        auth_params = api.nova.get_auth_params_from_request(request)
+        auth_params = get_auth_params_from_request(request)
         inject_nova_client_auth_params(auth_params)
         gsession = cmd_gsession()
         os.chdir(settings.JOBS_BASE_PATH)
@@ -41,7 +53,7 @@ class DownloadOutputJobAction(tables.Action):
 
     def handle(self, data_table, request, object_ids):
         zip_io = io.BytesIO()
-        auth_params = api.nova.get_auth_params_from_request(request)
+        auth_params = get_auth_params_from_request(request)
         inject_nova_client_auth_params(auth_params)
         gsession = cmd_gsession()
         os.chdir(settings.JOBS_BASE_PATH)
