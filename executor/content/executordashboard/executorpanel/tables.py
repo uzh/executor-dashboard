@@ -26,6 +26,13 @@ def get_auth_params_from_request(request):
     )
 
 
+def zipdir(path, ziph):
+    # ziph is zipfile handle
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            ziph.write(os.path.join(root, file))
+
+
 class DeleteJobAction(tables.DeleteAction):
     def action_present(self, number):
         return "Delete"
@@ -65,8 +72,8 @@ class DownloadOutputJobAction(tables.Action):
             for task_key in gsession.session.tasks:
                 if gsession.session.tasks[task_key].persistent_id in object_ids:
                     with zipfile.ZipFile(zip_io, mode='w', compression=zipfile.ZIP_DEFLATED) as backup_zip:
-                        backup_zip.write(gsession.session.tasks[
-                                             task_key].output_dir)  # u can also make use of list of filename location
+                        zipdir(gsession.session.tasks[task_key].output_dir,
+                               backup_zip)  # u can also make use of list of filename location
                         # and do some iteration over it
         response = HttpResponse(zip_io.getvalue(), content_type='application/x-zip-compressed')
         response['Content-Disposition'] = 'attachment; filename=%s' % 'output' + ".zip"
