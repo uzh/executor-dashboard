@@ -7,7 +7,6 @@ from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
 from gc3libs.session import Session
 from gc3utils.commands import cmd_gsession
-
 from horizon import tables
 from openstack_dashboard import api
 
@@ -26,6 +25,7 @@ def get_auth_params_from_request(request):
         api.base.url_for(request, 'identity')
     )
 
+
 class DeleteJobAction(tables.DeleteAction):
     def action_present(self, number):
         return "Delete"
@@ -38,7 +38,7 @@ class DeleteJobAction(tables.DeleteAction):
         auth_params = get_auth_params_from_request(request)
         inject_nova_client_auth_params(auth_params)
         gsession = cmd_gsession()
-        basePath = "{}/{}".format(settings.JOBS_BASE_PATH, self.request.user.username)
+        basePath = "{}/{}".format(settings.JOBS_BASE_PATH, request.user.username)
         os.chdir(basePath)
         for jobPath in os.listdir(basePath):
             gsession.params.session = jobPath
@@ -57,7 +57,7 @@ class DownloadOutputJobAction(tables.Action):
         auth_params = get_auth_params_from_request(request)
         inject_nova_client_auth_params(auth_params)
         gsession = cmd_gsession()
-        basePath = "{}/{}".format(settings.JOBS_BASE_PATH, self.request.user.username)
+        basePath = "{}/{}".format(settings.JOBS_BASE_PATH, request.user.username)
         os.chdir(basePath)
         for jobPath in os.listdir(basePath):
             gsession.params.session = jobPath
@@ -65,7 +65,8 @@ class DownloadOutputJobAction(tables.Action):
             for task_key in gsession.session.tasks:
                 if gsession.session.tasks[task_key].persistent_id in object_ids:
                     with zipfile.ZipFile(zip_io, mode='w', compression=zipfile.ZIP_DEFLATED) as backup_zip:
-                        backup_zip.write(gsession.session.tasks[task_key].output_dir) # u can also make use of list of filename location
+                        backup_zip.write(gsession.session.tasks[
+                                             task_key].output_dir)  # u can also make use of list of filename location
                         # and do some iteration over it
         response = HttpResponse(zip_io.getvalue(), content_type='application/x-zip-compressed')
         response['Content-Disposition'] = 'attachment; filename=%s' % 'output' + ".zip"

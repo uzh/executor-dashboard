@@ -1,6 +1,8 @@
 CHANGES
 =======
 
+* multi user
+* -compatible with mitaka
 * horizon requirements
 * - on the way to mitaka support
 * - downgrade to mitaka
