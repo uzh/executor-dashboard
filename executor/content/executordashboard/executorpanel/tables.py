@@ -38,8 +38,9 @@ class DeleteJobAction(tables.DeleteAction):
         auth_params = get_auth_params_from_request(request)
         inject_nova_client_auth_params(auth_params)
         gsession = cmd_gsession()
-        os.chdir(settings.JOBS_BASE_PATH)
-        for jobPath in os.listdir(settings.JOBS_BASE_PATH):
+        basePath = "{}/{}".format(settings.JOBS_BASE_PATH, self.request.user.username)
+        os.chdir(basePath)
+        for jobPath in os.listdir(basePath):
             gsession.params.session = jobPath
             gsession.session = Session(jobPath, create=False)
             for task_key in gsession.session.tasks:
@@ -56,8 +57,9 @@ class DownloadOutputJobAction(tables.Action):
         auth_params = get_auth_params_from_request(request)
         inject_nova_client_auth_params(auth_params)
         gsession = cmd_gsession()
-        os.chdir(settings.JOBS_BASE_PATH)
-        for jobPath in os.listdir(settings.JOBS_BASE_PATH):
+        basePath = "{}/{}".format(settings.JOBS_BASE_PATH, self.request.user.username)
+        os.chdir(basePath)
+        for jobPath in os.listdir(basePath):
             gsession.params.session = jobPath
             gsession.session = Session(jobPath, create=False)
             for task_key in gsession.session.tasks:

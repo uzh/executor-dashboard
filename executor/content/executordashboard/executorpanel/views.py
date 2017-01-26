@@ -17,7 +17,6 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 from gc3libs.session import Session
 from gc3utils.commands import cmd_gsession
-
 from horizon import views, tables
 from openstack_dashboard import api
 from openstack_dashboard import settings
@@ -26,6 +25,8 @@ from executor.content.executordashboard.executorpanel.tables import JobsTable
 from executor.content.executordashboard.executorpanel.utils import inject_nova_client_auth_params
 from executor.content.executordashboard.gc3apps.gndn import GndnScript
 from executor.content.executordashboard.tasks import runGC3PieTask
+
+
 def get_auth_params_from_request(request):
     """Extracts the properties from the request object needed by the novaclient
     call below. These will be used to memoize the calls to novaclient
@@ -61,14 +62,16 @@ class IndexView(tables.DataTableView):
         inject_nova_client_auth_params(auth_params)
         gsession = cmd_gsession()
         defaultPath = os.getcwd()
+
+        basePath = "{}/{}".format(settings.JOBS_BASE_PATH, self.request.user.username)
         try:
-            os.makedirs(settings.JOBS_BASE_PATH)
+            os.makedirs(basePath)
         except:
             pass
-        os.chdir(settings.JOBS_BASE_PATH)
+        os.chdir(basePath)
 
         tasks = []
-        for jobPath in os.listdir(settings.JOBS_BASE_PATH):
+        for jobPath in os.listdir(basePath):
             gsession.params.session = jobPath
             gsession.session = Session(jobPath, create=False)
             for task_key in gsession.session.tasks:
@@ -86,7 +89,6 @@ class CreateJobView(views.APIView):
     template_name = 'executordashboard/executorpanel/job_form.html'
 
     def get_data(self, request, context, *args, **kwargs):
-
 
         payload = {}
         for key, action in GndnScript().actions.items():
@@ -106,14 +108,16 @@ class CreateJobView(views.APIView):
         return context
 
     def post(self, request, *args, **kwargs):
+        inputPath = "{}/{}".format(settings.INPUT_BASE_PATH, request.user.username)
         try:
-            os.makedirs(settings.INPUT_BASE_PATH)
+            os.makedirs(inputPath)
         except:
             pass
         paths = []
         for key, file in request.FILES.iteritems():
             filename, file_extension = os.path.splitext(file.name)
-            file_path = "{}/{}{}".format(settings.INPUT_BASE_PATH, uuid.uuid4(), file_extension)
+            file_path = "{}/{}{}".format(inputPath, uuid.uuid4(),
+                                            file_extension)
             with open(file_path, 'wb+') as destination:
                 for chunk in file.chunks():
                     destination.write(chunk)

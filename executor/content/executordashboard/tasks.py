@@ -15,15 +15,17 @@ from executor.content.executordashboard.gc3apps import gndn
 
 @shared_task
 def runGC3PieTask(auth_params, script_params, input_files):
+    username = auth_params[0]
     inject_nova_client_auth_params(auth_params)
 
     defaultPath = os.getcwd()
     defaultArgv = sys.argv
+    basePath = "{}/{}".format(settings.JOBS_BASE_PATH, username)
     try:
-        os.makedirs(settings.JOBS_BASE_PATH)
+        os.makedirs(basePath)
     except:
         pass
-    os.chdir(settings.JOBS_BASE_PATH)
+    os.chdir(basePath)
     script = gndn.GndnScript()
     payload = {}
     for key, action in script.actions.items():
@@ -49,10 +51,11 @@ def runGC3PieTask(auth_params, script_params, input_files):
     sys.argv.append("-C")
     sys.argv.append("30")
     sys.argv.append("-o")
-    sys.argv.append("{}/NAME".format(settings.OUTPUT_BASE_PATH))
+    outputPath = "{}/{}".format(settings.OUTPUT_BASE_PATH, username)
+    sys.argv.append("{}/NAME".format(outputPath))
     for file in input_files:
         if file.lower().endswith('zip'):
-            directory_path = "{}/{}".format(settings.INPUT_BASE_PATH, uuid.uuid4())
+            directory_path = "{}/{}/{}".format(settings.INPUT_BASE_PATH,username, uuid.uuid4())
             zip_ref = zipfile.ZipFile(file, 'r')
             zip_ref.extractall(directory_path)
             zip_ref.close()
