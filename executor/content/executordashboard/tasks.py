@@ -18,7 +18,6 @@ gc3libs.log = get_task_logger('gc3pie')
 gc3libs.log.setLevel(logging.DEBUG)
 
 from executor.content.executordashboard.executorpanel.utils import inject_nova_client_auth_params
-from executor.content.executordashboard.gc3apps import gndn
 
 
 @shared_task
@@ -82,7 +81,7 @@ def runGC3PieTask(auth_params, script_params, input_files):
         def noop(*args, **kwargs):
             pass
 
-        grayscaler.gc3libs.configure_logger = noop
+        gc3libs.configure_logger = noop
         script.run()
     except SystemExit:
         print "exit called"
