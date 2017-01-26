@@ -12,7 +12,7 @@
 
 from django.conf.urls import url
 
-from openstack_dashboard.dashboards.executordashboard.executorpanel import views
+from executor.content.executordashboard.executorpanel import views
 
 urlpatterns = [
     url(r'^$', views.IndexView.as_view(), name='index'),

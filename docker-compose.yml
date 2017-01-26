@@ -1,0 +1,15 @@
+version: '2'
+services:
+
+  redis:
+    image: redis:2.8.19
+
+  web:
+    build: .
+    environment:
+      - C_FORCE_ROOT=true
+    command: bash -c "supervisord -n"
+    ports:
+      - "8000:80"
+    depends_on:
+      - redis

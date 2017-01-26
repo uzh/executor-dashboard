@@ -13,7 +13,9 @@
 from django.utils.translation import ugettext_lazy as _
 
 import horizon
-from openstack_dashboard.dashboards.executordashboard import dashboard
+
+from executor.content.executordashboard import dashboard
+
 
 class Executorpanel(horizon.Panel):
     name = _("Jobs")

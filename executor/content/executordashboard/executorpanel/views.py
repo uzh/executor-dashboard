@@ -21,10 +21,11 @@ from gc3utils.commands import cmd_gsession
 from horizon import views, tables
 from openstack_dashboard import api
 from openstack_dashboard import settings
-from openstack_dashboard.dashboards.executordashboard.executorpanel.tables import JobsTable
-from openstack_dashboard.dashboards.executordashboard.executorpanel.utils import inject_nova_client_auth_params
-from openstack_dashboard.dashboards.executordashboard.gndn import GndnScript
-from openstack_dashboard.dashboards.executordashboard.tasks import runGC3PieTask
+
+from executor.content.executordashboard.executorpanel.tables import JobsTable
+from executor.content.executordashboard.executorpanel.utils import inject_nova_client_auth_params
+from executor.content.executordashboard.gc3apps.gndn import GndnScript
+from executor.content.executordashboard.tasks import runGC3PieTask
 
 
 class ListView(tables.DataTableView):
@@ -79,17 +80,18 @@ class CreateJobView(views.APIView):
 
         payload = {}
         for key, action in GndnScript().actions.items():
-            payload[key] = action.__dict__
-            if isinstance(action, _StoreAction):
-                payload[key]["type"] = "text"
-            elif isinstance(action, _CountAction):
-                payload[key]["type"] = "number"
-            else:
-                payload[key]["type"] = "bool"
-            if type(payload[key]['const']) is str:
-                payload[key]['const'] = payload[key]['const'].split(',')
-            else:
-                payload[key]['const'] = None
+            if action.option_strings[0] not in settings.IGNORE_PARAMS:
+                payload[key] = action.__dict__
+                if isinstance(action, _StoreAction):
+                    payload[key]["type"] = "text"
+                elif isinstance(action, _CountAction):
+                    payload[key]["type"] = "number"
+                else:
+                    payload[key]["type"] = "bool"
+                if type(payload[key]['const']) is str:
+                    payload[key]['const'] = payload[key]['const'].split(',')
+                else:
+                    payload[key]['const'] = None
         context["params"] = payload
         return context
 

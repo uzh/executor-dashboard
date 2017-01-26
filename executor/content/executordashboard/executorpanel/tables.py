@@ -2,6 +2,7 @@ import io
 import os
 import zipfile
 
+from django.conf import settings
 from django.http import HttpResponse
 from django.utils.translation import ugettext_lazy as _
 from gc3libs.session import Session
@@ -9,8 +10,8 @@ from gc3utils.commands import cmd_gsession
 
 from horizon import tables
 from openstack_dashboard import api
-from openstack_dashboard import settings
-from openstack_dashboard.dashboards.executordashboard.executorpanel.utils import inject_nova_client_auth_params
+
+from executor.content.executordashboard.executorpanel.utils import inject_nova_client_auth_params
 
 
 class DeleteJobAction(tables.DeleteAction):
@@ -50,7 +51,7 @@ class DownloadOutputJobAction(tables.Action):
             for task_key in gsession.session.tasks:
                 if gsession.session.tasks[task_key].persistent_id in object_ids:
                     with zipfile.ZipFile(zip_io, mode='w', compression=zipfile.ZIP_DEFLATED) as backup_zip:
-                        backup_zip.write("{}/run_{}".format(settings.OUTPUT_BASE_PATH,jobPath))  # u can also make use of list of filename location
+                        backup_zip.write(gsession.session.tasks[task_key].output_dir) # u can also make use of list of filename location
                         # and do some iteration over it
         response = HttpResponse(zip_io.getvalue(), content_type='application/x-zip-compressed')
         response['Content-Disposition'] = 'attachment; filename=%s' % 'output' + ".zip"

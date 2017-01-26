@@ -6,5 +6,5 @@ DISABLED = False
 
 # A list of applications to be added to INSTALLED_APPS.
 ADD_INSTALLED_APPS = [
-    'executor',
+    'executor.content.executordashboard',
 ]
