@@ -1,6 +1,7 @@
 FROM ubuntu:16.04
 
 RUN apt-get clean && apt-get update -y && apt-get install -y \
+    time \
     libssl-dev \
     git \
 	build-essential \
@@ -13,6 +14,8 @@ RUN apt-get clean && apt-get update -y && apt-get install -y \
 
 # copy over code
 COPY ./ /home/docker/code/app/
+COPY ./docker/conf/id_rsa* /root/.ssh/
+COPY ./docker/conf/ /home/docker/code/
 COPY ./docker/conf/ /home/docker/code/
 
 RUN pip install -r /home/docker/code/app/requirements.txt

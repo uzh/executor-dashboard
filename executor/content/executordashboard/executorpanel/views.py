@@ -23,7 +23,7 @@ from openstack_dashboard import settings
 
 from executor.content.executordashboard.executorpanel.tables import JobsTable
 from executor.content.executordashboard.executorpanel.utils import inject_nova_client_auth_params
-from executor.content.executordashboard.gc3apps.gndn import GndnScript
+from executor.content.executordashboard.gc3apps import grayscaler
 from executor.content.executordashboard.tasks import runGC3PieTask
 
 
@@ -74,6 +74,7 @@ class IndexView(tables.DataTableView):
         for jobPath in os.listdir(basePath):
             gsession.params.session = jobPath
             gsession.session = Session(jobPath, create=False)
+
             for task_key in gsession.session.tasks:
                 tasks.append({
                     "id": gsession.session.tasks[task_key].persistent_id,
@@ -91,7 +92,7 @@ class CreateJobView(views.APIView):
     def get_data(self, request, context, *args, **kwargs):
 
         payload = {}
-        for key, action in GndnScript().actions.items():
+        for key, action in grayscaler.GrayscaleScript().actions.items():
             if action.option_strings[0] not in settings.IGNORE_PARAMS:
                 payload[key] = action.__dict__
                 if isinstance(action, _StoreAction):

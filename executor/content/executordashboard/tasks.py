@@ -1,17 +1,25 @@
 # Create your tasks here
 from __future__ import absolute_import, unicode_literals
 
+import logging
 import os
 import sys
 import uuid
 import zipfile
 
+import gc3libs
 from celery import shared_task
+from celery.utils.log import get_task_logger
 from django.conf import settings
-from gc3libs.config import Configuration
+
+from executor.content.executordashboard.gc3apps import grayscaler
+
+gc3libs.log = get_task_logger('gc3pie')
+gc3libs.log.setLevel(logging.DEBUG)
 
 from executor.content.executordashboard.executorpanel.utils import inject_nova_client_auth_params
 from executor.content.executordashboard.gc3apps import gndn
+
 
 @shared_task
 def runGC3PieTask(auth_params, script_params, input_files):
@@ -26,10 +34,11 @@ def runGC3PieTask(auth_params, script_params, input_files):
     except:
         pass
     os.chdir(basePath)
-    script = gndn.GndnScript()
+    script = grayscaler.GrayscaleScript()
     payload = {}
     for key, action in script.actions.items():
-        if action.option_strings[0] not in settings.IGNORE_PARAMS and key in script_params and len(script_params[key]) > 0:
+        if action.option_strings[0] not in settings.IGNORE_PARAMS and key in script_params and len(
+                script_params[key]) > 0:
             payload[action.option_strings[0]] = script_params[key]
             # payload[key] = action.__dict__
             # if isinstance(action, _StoreAction):
@@ -48,6 +57,7 @@ def runGC3PieTask(auth_params, script_params, input_files):
     for key, param in payload.items():
         sys.argv.append(key)
         sys.argv.append(param)
+    sys.argv.append("-vvv")
     sys.argv.append("-C")
     sys.argv.append("30")
     sys.argv.append("-o")
@@ -55,7 +65,7 @@ def runGC3PieTask(auth_params, script_params, input_files):
     sys.argv.append("{}/NAME".format(outputPath))
     for file in input_files:
         if file.lower().endswith('zip'):
-            directory_path = "{}/{}/{}".format(settings.INPUT_BASE_PATH,username, uuid.uuid4())
+            directory_path = "{}/{}/{}".format(settings.INPUT_BASE_PATH, username, uuid.uuid4())
             zip_ref = zipfile.ZipFile(file, 'r')
             zip_ref.extractall(directory_path)
             zip_ref.close()
@@ -63,13 +73,16 @@ def runGC3PieTask(auth_params, script_params, input_files):
         else:
             sys.argv.append(file)
     print " ".join(sys.argv)
-    script = gndn.GndnScript()
-
-    script.config = Configuration(settings.GC3PIE_CONF)
+    os.environ["GC3PIE_CONF"] = settings.GC3PIE_CONF
     os.environ["OS_AUTH_URL"] = settings.OS_AUTH_URL
+    script = grayscaler.GrayscaleScript()
 
     print "starting script"
     try:
+        def noop(*args, **kwargs):
+            pass
+
+        grayscaler.gc3libs.configure_logger = noop
         script.run()
     except SystemExit:
         print "exit called"
