@@ -18,6 +18,7 @@ COPY ./docker/conf/ /home/docker/code/
 RUN pip install -r /home/docker/code/app/requirements.txt
 RUN cd /home/docker/code/app/ && python setup.py sdist && pip install dist/*.tar.gz
 RUN git clone -b stable/mitaka https://github.com/openstack/horizon.git /home/docker/code/horizon
+RUN pip install -r /home/docker/code/horizon/requirements.txt
 COPY ./executor/enabled/_31050_executordashboard.py /home/docker/code/horizon/openstack_dashboard/local/enabled/
 COPY ./executor/local_settings.d/_9900_executor_settings.docker.py /home/docker/code/horizon/openstack_dashboard/local/local_settings.d/
 RUN cd /home/docker/code/horizon/openstack_dashboard/local && cp local_settings.py.example local_settings.py
