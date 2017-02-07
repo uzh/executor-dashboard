@@ -28,7 +28,6 @@ def inject_nova_client_auth_params(auth_params):
         pooldir = os.path.join(os.path.expandvars(OpenStackLrms.RESOURCE_DIR),
                                'vmpool', self.name)
         self._vmpool = OpenStackVMPool(pooldir, self.client)
-        print self.client.servers.list()
 
     OpenStackLrms.__init__ = newOpenstackInit
     # end of monkeypatch

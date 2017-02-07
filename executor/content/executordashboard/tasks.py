@@ -61,7 +61,7 @@ def runGC3PieTask(auth_params, script_params, input_files):
     sys.argv.append("30")
     sys.argv.append("-o")
     outputPath = "{}/{}".format(settings.OUTPUT_BASE_PATH, username)
-    sys.argv.append("{}/NAME".format(outputPath))
+    sys.argv.append("{}/{}".format(outputPath,uuid.uuid4()))
     for file in input_files:
         if file.lower().endswith('zip'):
             directory_path = "{}/{}/{}".format(settings.INPUT_BASE_PATH, username, uuid.uuid4())
